@@ -142,9 +142,14 @@ else
     warn "MySQL membutuhkan waktu lebih lama untuk inisialisasi. Silakan cek status dengan: docker compose ps"
 fi
 
-# Dapatkan IP Publik VPS
-info "Mendeteksi alamat IP publik VPS..."
-PUBLIC_IP=$(curl -s https://ifconfig.me || curl -s https://api.ipify.org || echo "IP_VPS_ANDA")
+# Dapatkan IP Lokal dan IP Publik VPS
+info "Mendeteksi alamat IP VPS..."
+LOCAL_IP=$(ip route get 1 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="src") print $(i+1)}' || true)
+if [ -z "$LOCAL_IP" ]; then
+    LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "127.0.0.1")
+fi
+
+PUBLIC_IP=$(curl -s --max-time 3 https://ifconfig.me || curl -s --max-time 3 https://api.ipify.org || echo "")
 
 # 10. Dashboard Ringkasan Instalasi
 echo ""
@@ -152,8 +157,19 @@ echo -e "${GREEN}===============================================================
 echo -e "       ${BOLD}${GREEN}INSTALASI SELESAI & DEPLOYMENT BERHASIL! 🎉${NC}"
 echo -e "${GREEN}=================================================================${NC}"
 echo ""
-echo -e "  ${BOLD}🌐 Web App Utama :${NC} http://${PUBLIC_IP}"
-echo -e "  ${BOLD}🗄️  phpMyAdmin   :${NC} http://${PUBLIC_IP}:8080"
+if [ ! -z "$LOCAL_IP" ] && [ "$LOCAL_IP" != "127.0.0.1" ]; then
+    echo -e "  ${BOLD}🌐 Akses Lokal (LAN/VM) :${NC}"
+    echo -e "     - Web App Utama    : http://${LOCAL_IP}"
+    echo -e "     - phpMyAdmin       : http://${LOCAL_IP}:8080"
+    echo ""
+fi
+if [ ! -z "$PUBLIC_IP" ] && [ "$PUBLIC_IP" != "$LOCAL_IP" ]; then
+    echo -e "  ${BOLD}🌍 Akses Publik (WAN)   :${NC}"
+    echo -e "     - Web App Utama    : http://${PUBLIC_IP}"
+    echo -e "     - phpMyAdmin       : http://${PUBLIC_IP}:8080"
+    echo -e "       ${YELLOW}(Pastikan port 80 & 8080 sudah dibuka di firewall VPS)${NC}"
+    echo ""
+fi
 echo ""
 echo -e "  ${BOLD}🔑 Kredensial Database (Disimpan di .env):${NC}"
 echo -e "     - DB Host      : db (koneksi antar container)"
