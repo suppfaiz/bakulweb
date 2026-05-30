@@ -97,6 +97,15 @@ class NocGuard {
             exit;
         }
 
+        // 1.5. Rate Limiting Check (Anti-Scraper & Anti-Bot)
+        if (!$isWhitelisted && self::checkRateLimit($ip)) {
+            self::$isBlocked = true;
+            self::logRequest($ip, 429, 'high', 'Rate Limit Exceeded', 'Too many requests in a short time (Scraper Blocked)');
+            http_response_code(429);
+            self::renderRateLimitPage($ip);
+            exit;
+        }
+
         // 2. Analyze request for threats
         self::analyzeRequest($ip);
 
@@ -193,8 +202,13 @@ class NocGuard {
             }
         }
 
-        // Suspicious User-Agent (automated scanner)
-        $suspiciousUAs = ['sqlmap', 'nikto', 'nmap', 'masscan', 'metasploit', 'python-requests', 'go-http-client', 'zgrab'];
+        // Suspicious User-Agent (automated scanner / scrapers / bots)
+        $suspiciousUAs = [
+            'sqlmap', 'nikto', 'nmap', 'masscan', 'metasploit', 'zgrab',
+            'python', 'scrapy', 'headless', 'selenium', 'puppeteer', 'playwright',
+            'curl', 'wget', 'axios', 'urllib', 'libwww', 'perl', 'httrack', 
+            'webcopy', 'postman', 'http-client', 'go-http-client'
+        ];
         foreach ($suspiciousUAs as $sua) {
             if (stripos($ua, $sua) !== false) {
                 self::$threatLevel  = 'medium';
@@ -336,5 +350,46 @@ class NocGuard {
         $settings = self::getSettings();
         $whitelist = array_map('trim', explode(',', $settings['whitelisted_ips'] ?? ''));
         return in_array($ip, $whitelist);
+    }
+
+    private static function checkRateLimit($ip) {
+        if (!self::$db) return false;
+        try {
+            // Count requests in the last 10 seconds for this IP
+            self::$db->query("SELECT COUNT(*) as count FROM noc_traffic_logs 
+                              WHERE ip = :ip AND created_at >= NOW() - INTERVAL 10 SECOND");
+            self::$db->bind('ip', $ip);
+            $res = self::$db->single();
+            
+            // If request count exceeds 25 in 10 seconds, trigger auto-block
+            if ($res && $res['count'] >= 25) {
+                self::autoBlockIP($ip, 'Rate Limit Exceeded: ' . $res['count'] . ' requests in 10s (Scraper Auto-Blocked)');
+                return true;
+            }
+        } catch (Throwable $e) {}
+        return false;
+    }
+
+    private static function renderRateLimitPage($ip) {
+        echo '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>429 - Terlalu Banyak Permintaan | BAKUL Security</title>
+        <style>
+            *{margin:0;padding:0;box-sizing:border-box;}
+            body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f8fafc;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+            .card{background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:48px 40px;max-width:500px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+            .icon{font-size:64px;margin-bottom:16px;}
+            h1{font-size:28px;font-weight:700;color:#1a202c;margin-bottom:8px;}
+            p{color:#718096;line-height:1.6;margin-bottom:12px;}
+            .ip{font-family:monospace;background:#fff5f5;color:#e53e3e;border:1px solid #fed7d7;border-radius:6px;padding:6px 14px;display:inline-block;font-size:14px;margin:8px 0;}
+            .sub{font-size:13px;color:#a0aec0;margin-top:20px;}
+        </style></head><body>
+        <div class="card">
+            <div class="icon">🚦</div>
+            <h1>Batas Kecepatan Terlampaui</h1>
+            <p>Sistem kami mendeteksi aktivitas berlebih dari alamat IP Anda dalam waktu singkat. Akses dibatasi sementara guna mencegah scraping otomatis.</p>
+            <div class="ip">IP Anda: ' . htmlspecialchars($ip) . '</div>
+            <p class="sub">Silakan tunggu beberapa saat sebelum mencoba memuat ulang halaman.</p>
+        </div></body></html>';
     }
 }
