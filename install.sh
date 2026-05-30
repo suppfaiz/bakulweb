@@ -81,17 +81,22 @@ if ! docker compose version &>/dev/null; then
 fi
 log "Docker Compose terverifikasi: $(docker compose version)"
 
-# 5. Clone Repository
+# 5. Clone Repository (atau jalankan in-place)
 INSTALL_DIR="bakulweb"
-if [ -d "$INSTALL_DIR" ]; then
-    BACKUP_DIR="${INSTALL_DIR}_backup_$(date +%Y%m%d_%H%M%S)"
-    warn "Direktori '$INSTALL_DIR' sudah ada. Memindahkan ke folder backup: $BACKUP_DIR"
-    mv "$INSTALL_DIR" "$BACKUP_DIR"
-fi
+if [ -f "docker-compose.yml" ] && [ -d "app" ]; then
+    info "Skrip dijalankan dari dalam folder project. Melewati langkah kloning..."
+    INSTALL_DIR="."
+else
+    if [ -d "$INSTALL_DIR" ]; then
+        BACKUP_DIR="${INSTALL_DIR}_backup_$(date +%Y%m%d_%H%M%S)"
+        warn "Direktori '$INSTALL_DIR' sudah ada. Memindahkan ke folder backup: $BACKUP_DIR"
+        mv "$INSTALL_DIR" "$BACKUP_DIR"
+    fi
 
-info "Mengkloning repository BAKUL E-Commerce dari GitHub..."
-git clone https://github.com/suppfaiz/bakulweb.git "$INSTALL_DIR"
-cd "$INSTALL_DIR"
+    info "Mengkloning repository BAKUL E-Commerce dari GitHub..."
+    git clone https://github.com/suppfaiz/bakulweb.git "$INSTALL_DIR"
+    cd "$INSTALL_DIR"
+fi
 
 # 6. Konfigurasi Environment & Generate Password Acak
 info "Menyiapkan konfigurasi environment (.env)..."
