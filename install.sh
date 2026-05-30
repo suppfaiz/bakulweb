@@ -99,18 +99,24 @@ else
 fi
 
 # 6. Konfigurasi Environment & Generate Password Acak
-info "Menyiapkan konfigurasi environment (.env)..."
-cp .env.example .env
+if [ ! -f ".env" ]; then
+    info "Menyiapkan konfigurasi environment (.env) baru..."
+    cp .env.example .env
 
-# Generate secure random passwords
-DB_PASS=$(openssl rand -hex 12)
-DB_ROOT_PASS=$(openssl rand -hex 16)
+    # Generate secure random passwords
+    DB_PASS=$(openssl rand -hex 12)
+    DB_ROOT_PASS=$(openssl rand -hex 16)
 
-# Edit .env menggunakan sed
-sed -i "s/DB_PASS=bakul_secret/DB_PASS=${DB_PASS}/g" .env
-sed -i "s/DB_ROOT_PASS=bakul_root_secret/DB_ROOT_PASS=${DB_ROOT_PASS}/g" .env
-
-log "Konfigurasi .env siap dengan database password yang aman."
+    # Edit .env menggunakan sed
+    sed -i "s/DB_PASS=bakul_secret/DB_PASS=${DB_PASS}/g" .env
+    sed -i "s/DB_ROOT_PASS=bakul_root_secret/DB_ROOT_PASS=${DB_ROOT_PASS}/g" .env
+    log "Konfigurasi .env baru berhasil dibuat dengan password acak."
+else
+    info "Menemukan file .env yang sudah ada. Menggunakan konfigurasi yang ada..."
+    DB_PASS=$(grep '^DB_PASS=' .env | cut -d '=' -f2-)
+    DB_ROOT_PASS=$(grep '^DB_ROOT_PASS=' .env | cut -d '=' -f2-)
+    log "Konfigurasi .env yang sudah ada berhasil dimuat."
+fi
 
 # 7. Atur Permission Uploads Folder
 info "Mengatur hak akses folder uploads..."
