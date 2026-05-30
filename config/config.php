@@ -9,8 +9,10 @@ define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') ?: '');
 define('DB_NAME', getenv('DB_NAME') ?: 'bakul_ecommerce');
 
-// Base URL Dinamis (otomatis HTTP/HTTPS)
+// Base URL Dinamis (otomatis HTTP/HTTPS, mendeteksi reverse proxy/SSL termination)
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
-    || (($_SERVER['SERVER_PORT'] ?? '') == 443)) ? "https://" : "http://";
+    || (($_SERVER['SERVER_PORT'] ?? '') == 443)
+    || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
+    || (($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '') === 'on')) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 define('BASEURL', $protocol . $host);
