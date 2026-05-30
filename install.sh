@@ -144,6 +144,29 @@ echo ""
 
 if [ "$DB_READY" = true ]; then
     log "Database MySQL siap digunakan dan skema database.sql berhasil dimuat."
+
+    # 9.5. Jalankan Migrasi Database Tambahan
+    info "Menjalankan migrasi database tambahan..."
+    MIGRATION_SCRIPTS=(
+        "run_migrations.php"
+        "run_noc_migration.php"
+        "run_noc_settings_migration.php"
+        "run_siem_migration.php"
+        "run_finance_cogs_migration.php"
+        "run_refund_migration.php"
+        "run_reconciliation_migration.php"
+        "run_verification_migration.php"
+    )
+
+    for script in "${MIGRATION_SCRIPTS[@]}"; do
+        if [ -f "scratch/$script" ]; then
+            info "Running migration: $script..."
+            docker compose exec -T app php "scratch/$script" || warn "Gagal menjalankan migrasi: $script"
+        else
+            warn "File migrasi scratch/$script tidak ditemukan."
+        fi
+    done
+    log "Semua migrasi database tambahan berhasil dijalankan!"
 else
     warn "MySQL membutuhkan waktu lebih lama untuk inisialisasi. Silakan cek status dengan: docker compose ps"
 fi
