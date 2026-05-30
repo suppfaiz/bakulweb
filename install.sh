@@ -126,7 +126,7 @@ log "Permission folder uploads berhasil diatur ke writable."
 
 # 8. Build dan Jalankan Container
 info "Membangun dan menjalankan container Docker (PHP, Nginx, MySQL, phpMyAdmin)..."
-docker compose up -d --build
+docker compose --profile tools up -d --build
 
 # 9. Verifikasi Database
 info "Menunggu database MySQL siap..."
