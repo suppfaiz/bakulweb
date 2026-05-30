@@ -48,6 +48,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASS:-bakul_secret}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-bakul_root_secret}
       TZ: Asia/Jakarta
+    command: --performance_schema=OFF --innodb_buffer_pool_size=64M
     ports:
       - "${DB_PORT:-3306}:3306"
     volumes:
