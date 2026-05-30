@@ -16,6 +16,7 @@ services:
       - DB_NAME=${DB_NAME:-bakul_ecommerce}
       - DB_USER=${DB_USER:-bakul_user}
       - DB_PASS=${DB_PASS:-bakul_secret}
+      - NOC_PASSWORD=${NOC_PASSWORD:-NocBakul2026!}
     depends_on:
       db:
         condition: service_healthy

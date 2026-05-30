@@ -16,3 +16,6 @@ $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off'
     || (($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '') === 'on')) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 define('BASEURL', $protocol . $host);
+
+// Password NOC untuk otentikasi log/keamanan
+define('NOC_PASSWORD', getenv('NOC_PASSWORD') ?: 'NocBakul2026!');

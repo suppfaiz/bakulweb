@@ -3,3 +3,6 @@
     RewriteRule ^$ public/ [L]
     RewriteRule (.*) public/$1 [L]
 </IfModule>
+
+# Block direct access to env, git, sql, etc.
+RedirectMatch 403 (?i)\.(env|git|composer|sql|htaccess|htpasswd|bash_history)$
