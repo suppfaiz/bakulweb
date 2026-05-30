@@ -82,6 +82,22 @@ services:
     networks:
       - bakul_net
 
+  # ── Cloudflare Tunnel (Opsional) ──────────────────────────────────────────
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: bakul_cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
+    depends_on:
+      - nginx
+    profiles:
+      - tunnel
+    networks:
+      - bakul_net
+
+
 volumes:
   bakul_db_data:
     driver: local
