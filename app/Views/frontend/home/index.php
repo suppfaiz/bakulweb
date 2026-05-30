@@ -505,37 +505,6 @@ if(!empty($flash_sales)):
 </section>
 <?php endif; ?>
 
-<!-- Trust Badges / Why BAKUL -->
-<section class="py-20 bg-gray-950 dark:bg-gray-900">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-14">
-            <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Kenapa BAKUL?</p>
-            <h2 class="text-3xl font-extrabold text-white">Belanja Lebih Aman & Mudah</h2>
-        </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <?php 
-            $trusts = [
-                ['icon' => 'fa-box-open', 'color' => 'text-blue-400', 'bg' => 'bg-blue-400/10', 
-                 'title' => 'Produk Original 100%', 'desc' => 'Semua produk bersumber dari distributor resmi & bergaransi.'],
-                ['icon' => 'fa-lock', 'color' => 'text-green-400', 'bg' => 'bg-green-400/10', 
-                 'title' => 'Transaksi Aman', 'desc' => 'Pembayaran terenkripsi SSL & dilindungi Midtrans.'],
-                ['icon' => 'fa-rotate-left', 'color' => 'text-orange-400', 'bg' => 'bg-orange-400/10',
-                 'title' => 'Retur Mudah', 'desc' => 'Proses pengembalian barang tanpa ribet dalam 7 hari.'],
-                ['icon' => 'fa-star', 'color' => 'text-yellow-400', 'bg' => 'bg-yellow-400/10',
-                 'title' => 'Rating Terpercaya', 'desc' => 'Ulasan nyata dari pelanggan yang telah berbelanja.'],
-            ];
-            foreach($trusts as $t): ?>
-            <div class="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors">
-                <div class="w-12 h-12 <?= $t['bg'] ?> rounded-xl flex items-center justify-center mb-5">
-                    <i class="fas <?= $t['icon'] ?> <?= $t['color'] ?> text-lg"></i>
-                </div>
-                <h3 class="font-bold text-white mb-2"><?= $t['title'] ?></h3>
-                <p class="text-sm text-gray-400 leading-relaxed"><?= $t['desc'] ?></p>
-            </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
 
 <!-- CTA Section -->
 <section class="py-20 bg-white dark:bg-darkbg">
