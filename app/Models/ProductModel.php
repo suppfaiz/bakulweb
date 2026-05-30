@@ -320,7 +320,7 @@ class ProductModel {
     }
 
     public function deleteProduct($id) {
-        // Disable FK checks sementara agar bisa hapus data terkait secara berurutan
+        // Disable FK checks agar bisa hapus data terkait tanpa error constraint
         $this->db->query("SET FOREIGN_KEY_CHECKS = 0");
         $this->db->execute();
 
@@ -331,11 +331,10 @@ class ProductModel {
         $this->db->bind('product_id', $id);
         $this->db->execute();
 
-        // 2. Set NULL pada order_items agar riwayat order tetap terjaga
-        //    (order_items.product_variant_id akan NULL, bukan dihapus)
-        $this->db->query("UPDATE order_items oi
+        // 2. Hapus order_items yang mereferensi varian produk ini
+        //    (order header/induk tetap tersimpan, hanya baris item yang dihapus)
+        $this->db->query("DELETE oi FROM order_items oi
                           INNER JOIN product_variants pv ON oi.product_variant_id = pv.id
-                          SET oi.product_variant_id = NULL
                           WHERE pv.product_id = :product_id");
         $this->db->bind('product_id', $id);
         $this->db->execute();
@@ -361,6 +360,7 @@ class ProductModel {
 
         return $result;
     }
+
 
     public function getProductById($id) {
         $this->db->query("SELECT * FROM products WHERE id = :id");
