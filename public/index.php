@@ -1,8 +1,20 @@
 <?php
-// Tampilkan error secara detail untuk debugging
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// Deteksi environment (localhost atau production)
+$isLocalhost = in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1', '[::1]']) 
+    || (strpos($_SERVER['HTTP_HOST'] ?? '', 'localhost:') === 0);
+
+if ($isLocalhost) {
+    // Development/Local: Tampilkan error secara detail untuk debugging
+    ini_set('display_errors', 1);
+    ini_set('display_startup_errors', 1);
+    error_reporting(E_ALL);
+} else {
+    // Production/VPS: Sembunyikan error dari publik, catat ke log sistem internal
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+    ini_set('log_errors', 1);
+    error_reporting(E_ALL);
+}
 
 // Serve static files directly if using PHP built-in server
 if (php_sapi_name() === 'cli-server') {
