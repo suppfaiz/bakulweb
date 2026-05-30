@@ -59,17 +59,17 @@ $first_variant = $data['first_variant'];
 
             <div class="sm:col-span-6">
                 <label class="block text-sm font-medium text-gray-700">Ganti Gambar Produk (Opsional)</label>
-                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-black transition" id="upload-box">
                     <div class="space-y-1 text-center">
-                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2" id="upload-icon"></i>
                         <div class="flex text-sm text-gray-600 justify-center">
                             <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-black hover:underline focus-within:outline-none">
-                                <span>Upload a file</span>
-                                <input id="file-upload" name="image" type="file" class="sr-only">
+                                <span id="upload-text">Upload a file</span>
+                                <input id="file-upload" name="image" type="file" class="sr-only" accept="image/*">
                             </label>
-                            <p class="pl-1">or drag and drop</p>
+                            <p class="pl-1" id="upload-subtext">or drag and drop</p>
                         </div>
-                        <p class="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
+                        <p class="text-xs text-gray-500" id="upload-info">PNG, JPG, GIF up to 2MB</p>
                     </div>
                 </div>
             </div>
@@ -173,5 +173,88 @@ $first_variant = $data['first_variant'];
         </div>
     </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadBox = document.getElementById('upload-box');
+    const fileInput = document.getElementById('file-upload');
+    const uploadIcon = document.getElementById('upload-icon');
+    const uploadText = document.getElementById('upload-text');
+    const uploadSubtext = document.getElementById('upload-subtext');
+    const uploadInfo = document.getElementById('upload-info');
+
+    if (uploadBox && fileInput) {
+        // Klik di area box manapun akan men-trigger input file
+        uploadBox.addEventListener('click', function() {
+            fileInput.click();
+        });
+
+        // Cegah trigger ganda jika mengklik label langsung
+        const label = uploadBox.querySelector('label');
+        if (label) {
+            label.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+
+        // Ketika file dipilih
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                
+                // Validasi tipe file
+                if (!file.type.match('image.*')) {
+                    alert('Silakan pilih file gambar (PNG, JPG, GIF)!');
+                    fileInput.value = '';
+                    return;
+                }
+
+                // Validasi ukuran (2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Ukuran file terlalu besar! Maksimal 2MB.');
+                    fileInput.value = '';
+                    return;
+                }
+
+                // Ubah tampilan UI
+                uploadIcon.className = "fas fa-check-circle text-3xl text-green-500 mb-2";
+                uploadText.textContent = "File Terpilih: ";
+                uploadText.className = "font-semibold text-green-600";
+                uploadSubtext.textContent = file.name;
+                uploadSubtext.className = "pl-1 text-gray-900 font-medium break-all";
+                uploadInfo.textContent = "Klik lagi di sini untuk mengganti gambar";
+                uploadInfo.className = "text-xs text-gray-400 mt-1";
+                uploadBox.classList.remove('border-gray-300');
+                uploadBox.classList.add('border-green-500', 'bg-green-50/30');
+            }
+        });
+
+        // Drag and drop event listeners
+        uploadBox.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadBox.classList.remove('border-gray-300');
+            uploadBox.classList.add('border-black', 'bg-gray-50');
+        });
+
+        uploadBox.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadBox.classList.remove('border-black', 'bg-gray-50');
+            uploadBox.classList.add('border-gray-300');
+        });
+
+        uploadBox.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadBox.classList.remove('border-black', 'bg-gray-50');
+            
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                fileInput.files = e.dataTransfer.files;
+                // Trigger change event manually
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        });
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../../layout/admin_footer.php'; ?>
