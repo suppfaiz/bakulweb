@@ -55,7 +55,7 @@ services:
       - bakul_db_data:/var/lib/mysql
       - ./database.sql:/docker-entrypoint-initdb.d/01_schema.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASS:-bakul_root_secret}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASS:-bakul_root_secret}" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -81,22 +81,6 @@ services:
       - tools
     networks:
       - bakul_net
-
-  # ── Cloudflare Tunnel (Opsional) ──────────────────────────────────────────
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: bakul_cloudflared
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${CF_TUNNEL_TOKEN}
-    depends_on:
-      - nginx
-    profiles:
-      - tunnel
-    networks:
-      - bakul_net
-
 
 volumes:
   bakul_db_data:
