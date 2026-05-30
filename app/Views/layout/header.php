@@ -3,12 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title><?= isset($data['judul']) ? $data['judul'] : 'BAKUL E-Commerce'; ?></title>
-    <meta name="description" content="BAKUL E-Commerce - Belanja Gadget, HP, dan Aksesoris Original dengan Harga Terbaik dan Terpercaya.">
-    <meta name="keywords" content="bakul, ecommerce, hp murah, aksesoris original, toko gadget">
+    <?php
+    // Default SEO values
+    $meta_title = isset($data['judul']) ? $data['judul'] : 'BAKUL E-Commerce';
+    $meta_desc = "BAKUL E-Commerce - Belanja Gadget, HP, dan Aksesoris Original dengan Harga Terbaik dan Terpercaya.";
+    $meta_keywords = "bakul, ecommerce, hp murah, aksesoris original, toko gadget";
+    $meta_image = BASEURL . "/images/logo.jpg";
+    $meta_url = BASEURL . ($_SERVER['REQUEST_URI'] ?? '');
+
+    if (isset($data['product'])) {
+        $meta_title = htmlspecialchars($data['product']['name']) . ' | BAKUL E-Commerce';
+        
+        // Clean description from HTML and limit to 155 characters
+        $desc = strip_tags($data['product']['description']);
+        $meta_desc = mb_strimwidth($desc, 0, 155, "...");
+        
+        // Keywords from product name & brand
+        $meta_keywords = htmlspecialchars($data['product']['name']) . ", " . htmlspecialchars($data['product']['brand_name'] ?? 'BAKUL') . ", beli " . htmlspecialchars($data['product']['name']) . ", bakul ecommerce";
+        
+        if (!empty($data['images'])) {
+            $meta_image = BASEURL . "/" . $data['images'][0]['image_path'];
+        }
+    }
+    ?>
+    <title><?= $meta_title; ?></title>
+    <meta name="description" content="<?= htmlspecialchars($meta_desc); ?>">
+    <meta name="keywords" content="<?= htmlspecialchars($meta_keywords); ?>">
     <meta name="robots" content="index, follow">
-    <meta property="og:title" content="<?= isset($data['judul']) ? $data['judul'] : 'BAKUL E-Commerce'; ?>">
-    <meta property="og:description" content="Toko Gadget Premium & Terpercaya di Indonesia.">
+    <link rel="canonical" href="<?= $meta_url; ?>">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?= $meta_url; ?>">
+    <meta property="og:title" content="<?= $meta_title; ?>">
+    <meta property="og:description" content="<?= htmlspecialchars($meta_desc); ?>">
+    <meta property="og:image" content="<?= $meta_image; ?>">
+    <meta property="og:site_name" content="BAKUL E-Commerce">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<?= $meta_url; ?>">
+    <meta property="twitter:title" content="<?= $meta_title; ?>">
+    <meta property="twitter:description" content="<?= htmlspecialchars($meta_desc); ?>">
+    <meta property="twitter:image" content="<?= $meta_image; ?>">
+
+    <?php if (isset($data['product'])): ?>
+    <!-- Product Schema JSON-LD for Google Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": "<?= htmlspecialchars($data['product']['name']); ?>",
+      "image": [
+        <?php 
+        $img_urls = [];
+        if (!empty($data['images'])) {
+            foreach ($data['images'] as $img) {
+                $img_urls[] = '"' . BASEURL . '/' . $img['image_path'] . '"';
+            }
+        } else {
+            $img_urls[] = '"' . BASEURL . '/images/logo.jpg"';
+        }
+        echo implode(",\n        ", $img_urls);
+        ?>
+      ],
+      "description": "<?= htmlspecialchars(mb_strimwidth(strip_tags($data['product']['description']), 0, 300, "...")); ?>",
+      "brand": {
+        "@type": "Brand",
+        "name": "<?= htmlspecialchars($data['product']['brand_name'] ?? 'BAKUL'); ?>"
+      },
+      <?php if (!empty($data['variants'])): 
+          $min_price = min(array_column($data['variants'], 'price'));
+          $max_price = max(array_column($data['variants'], 'price'));
+          $in_stock = false;
+          foreach ($data['variants'] as $v) {
+              if ($v['stock'] > 0) $in_stock = true;
+          }
+      ?>
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "IDR",
+        "lowPrice": "<?= $min_price; ?>",
+        "highPrice": "<?= $max_price; ?>",
+        "offerCount": "<?= count($data['variants']); ?>",
+        "availability": "<?= $in_stock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'; ?>"
+      },
+      <?php endif; ?>
+      <?php if (!empty($data['rating_info']) && $data['rating_info']['review_count'] > 0): ?>
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "<?= number_format($data['rating_info']['avg_rating'], 1); ?>",
+        "reviewCount": "<?= $data['rating_info']['review_count']; ?>"
+      }
+      <?php endif; ?>
+    }
+    </script>
+    <?php endif; ?>
     
     <!-- Apple Web App Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
