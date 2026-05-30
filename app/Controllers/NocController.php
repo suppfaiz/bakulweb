@@ -1077,20 +1077,26 @@ class NocController extends Controller {
 
         $backupDir = realpath($_SERVER['DOCUMENT_ROOT'] . '/../') . '/backups';
         if (!is_dir($backupDir)) {
-            mkdir($backupDir, 0755, true);
+            @mkdir($backupDir, 0777, true);
         }
 
         $files = [];
-        $scanned = scandir($backupDir);
-        foreach ($scanned as $f) {
-            if ($f !== '.' && $f !== '..') {
-                $path = $backupDir . '/' . $f;
-                $files[] = [
-                    'name' => $f,
-                    'size' => filesize($path),
-                    'date' => date('Y-m-d H:i:s', filemtime($path)),
-                    'path' => $path
-                ];
+        if (is_dir($backupDir)) {
+            $scanned = scandir($backupDir);
+            if (is_array($scanned)) {
+                foreach ($scanned as $f) {
+                    if ($f !== '.' && $f !== '..') {
+                        $path = $backupDir . '/' . $f;
+                        if (file_exists($path)) {
+                            $files[] = [
+                                'name' => $f,
+                                'size' => filesize($path),
+                                'date' => date('Y-m-d H:i:s', filemtime($path)),
+                                'path' => $path
+                            ];
+                        }
+                    }
+                }
             }
         }
 

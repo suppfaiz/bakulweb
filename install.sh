@@ -118,11 +118,11 @@ else
     log "Konfigurasi .env yang sudah ada berhasil dimuat."
 fi
 
-# 7. Atur Permission Uploads Folder
-info "Mengatur hak akses folder uploads..."
-mkdir -p public/uploads
-chmod -R 777 public/uploads
-log "Permission folder uploads berhasil diatur ke writable."
+# 7. Atur Permission Uploads & Backups Folder
+info "Mengatur hak akses folder uploads & backups..."
+mkdir -p public/uploads backups
+chmod -R 777 public/uploads backups
+log "Permission folder uploads & backups berhasil diatur ke writable."
 
 # 8. Build dan Jalankan Container
 info "Membangun dan menjalankan container Docker (PHP, Nginx, MySQL, phpMyAdmin)..."
