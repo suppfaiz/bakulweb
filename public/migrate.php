@@ -1,7 +1,8 @@
 <?php
 // public/migrate.php
-if (php_sapi_name() !== 'cli' && !isset($_GET['run'])) {
-    echo "This script is designed to be run from the command line, or via web browser by visiting: ?run=1";
+if (php_sapi_name() !== 'cli') {
+    http_response_code(403);
+    echo "Access denied: This script can only be run from the command line.";
     exit;
 }
 
