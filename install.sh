@@ -156,6 +156,7 @@ if [ "$DB_READY" = true ]; then
         "run_refund_migration.php"
         "run_reconciliation_migration.php"
         "run_verification_migration.php"
+        "seed_admin.php"
     )
 
     for script in "${MIGRATION_SCRIPTS[@]}"; do
