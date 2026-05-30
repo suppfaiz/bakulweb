@@ -81,6 +81,12 @@ class CheckoutController extends Controller {
             $courier_service = 'Ketemuan';
             $shipping_cost   = 0;
             $payment_method  = 'COD (Bayar di Tempat)';
+        } elseif ($payment_method_val === 'bank_transfer') {
+            $courier_parts   = explode('|', $courier_key);
+            $courier         = $courier_parts[0] ?? 'JNE';
+            $courier_service = $courier_parts[1] ?? 'REG';
+            $shipping_cost   = $shipping_cost_raw;
+            $payment_method  = 'Transfer Bank BNI';
         } else {
             $courier_parts   = explode('|', $courier_key);
             $courier         = $courier_parts[0] ?? 'JNE';
@@ -199,6 +205,12 @@ class CheckoutController extends Controller {
                 'Pesanan COD Dibuat',
                 'Pesanan COD dengan invoice ' . $invoice . ' telah berhasil dibuat. Silakan hubungi penjual untuk koordinasi ketemuan.'
             );
+        } elseif ($payment_method_val === 'bank_transfer') {
+            $notificationModel->createNotification(
+                $_SESSION['user_id'],
+                'Pesanan Menunggu Transfer',
+                'Pesanan ' . $invoice . ' berhasil dibuat. Silakan transfer Rp ' . number_format($total_amount, 0, ',', '.') . ' ke BNI 0231090661 a/n Septian Faiz Witana, lalu kirim bukti via WhatsApp.'
+            );
         } else {
             $notificationModel->createNotification(
                 $_SESSION['user_id'],
@@ -210,6 +222,8 @@ class CheckoutController extends Controller {
         // Redirect ke halaman yang sesuai
         if ($is_cod) {
             header('Location: ' . BASEURL . '/checkout/cod_success/' . $invoice);
+        } elseif ($payment_method_val === 'bank_transfer') {
+            header('Location: ' . BASEURL . '/checkout/bank_transfer_success/' . $invoice);
         } else {
             header('Location: ' . BASEURL . '/checkout/payment/' . $invoice);
         }
@@ -234,7 +248,29 @@ class CheckoutController extends Controller {
         $data['judul']   = 'Pesanan COD Berhasil | BAKUL';
         $data['invoice'] = htmlspecialchars($invoice);
         $data['order']   = $order;
+        $data['wa_number'] = '6282312345678'; // Update dengan nomor WA penjual
         $this->view('frontend/checkout/cod_success', $data);
+    }
+
+    // GET /checkout/bank_transfer_success/{invoice}
+    public function bank_transfer_success($invoice = null) {
+        if(!$invoice) {
+            header('Location: ' . BASEURL);
+            exit;
+        }
+
+        $orderModel = $this->model('OrderModel');
+        $order      = $orderModel->getOrderByInvoice($invoice);
+
+        if(!$order || ($order['user_id'] != $_SESSION['user_id'])) {
+            header('Location: ' . BASEURL);
+            exit;
+        }
+
+        $data['judul']   = 'Menunggu Pembayaran Transfer | BAKUL';
+        $data['invoice'] = htmlspecialchars($invoice);
+        $data['order']   = $order;
+        $this->view('frontend/checkout/bank_transfer_success', $data);
     }
 
     // GET /checkout/payment/{invoice}

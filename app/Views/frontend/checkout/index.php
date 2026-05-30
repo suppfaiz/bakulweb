@@ -105,24 +105,10 @@ $couriers = [
                         </div>
                         <div class="p-6">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <!-- Online Payment (Midtrans) -->
-                                <label class="flex items-center justify-between border-2 border-gray-100 dark:border-gray-800 rounded-xl p-4 cursor-pointer hover:border-gray-300 transition has-[:checked]:border-black dark:has-[:checked]:border-white has-[:checked]:bg-gray-50 dark:has-[:checked]:bg-gray-805/30">
-                                    <div class="flex items-center gap-3">
-                                        <input type="radio" name="payment_method" value="midtrans" checked 
-                                            class="w-4 h-4 accent-black dark:accent-white"
-                                            onchange="selectPaymentMethod('midtrans')">
-                                        <div>
-                                            <p class="font-bold text-gray-900 dark:text-white text-sm">Transfer / E-Wallet</p>
-                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Online via Midtrans</p>
-                                        </div>
-                                    </div>
-                                    <i class="fas fa-wallet text-gray-400 dark:text-gray-500 text-lg"></i>
-                                </label>
-
                                 <!-- COD Payment -->
                                 <label class="flex items-center justify-between border-2 border-gray-100 dark:border-gray-800 rounded-xl p-4 cursor-pointer hover:border-gray-300 transition has-[:checked]:border-black dark:has-[:checked]:border-white has-[:checked]:bg-gray-50 dark:has-[:checked]:bg-gray-805/30">
                                     <div class="flex items-center gap-3">
-                                        <input type="radio" name="payment_method" value="cod"
+                                        <input type="radio" name="payment_method" value="cod" checked
                                             class="w-4 h-4 accent-black dark:accent-white"
                                             onchange="selectPaymentMethod('cod')">
                                         <div>
@@ -132,7 +118,57 @@ $couriers = [
                                     </div>
                                     <i class="fas fa-handshake text-gray-400 dark:text-gray-500 text-lg"></i>
                                 </label>
+
+                                <!-- Transfer Bank BNI -->
+                                <label class="flex items-center justify-between border-2 border-gray-100 dark:border-gray-800 rounded-xl p-4 cursor-pointer hover:border-gray-300 transition has-[:checked]:border-black dark:has-[:checked]:border-white has-[:checked]:bg-gray-50 dark:has-[:checked]:bg-gray-805/30">
+                                    <div class="flex items-center gap-3">
+                                        <input type="radio" name="payment_method" value="bank_transfer"
+                                            class="w-4 h-4 accent-black dark:accent-white"
+                                            onchange="selectPaymentMethod('bank_transfer')">
+                                        <div>
+                                            <p class="font-bold text-gray-900 dark:text-white text-sm">Transfer Bank BNI</p>
+                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Transfer Manual & Konfirmasi</p>
+                                        </div>
+                                    </div>
+                                    <i class="fas fa-university text-gray-400 dark:text-gray-500 text-lg"></i>
+                                </label>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- BNI Transfer Info Box (hidden by default) -->
+                    <div id="bniInfoBox" class="hidden bg-gradient-to-br from-orange-50 to-amber-50 dark:from-gray-800 dark:to-gray-750 border-2 border-orange-200 dark:border-orange-700 rounded-2xl p-5">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="w-8 h-8 bg-orange-500 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-university text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="font-black text-gray-900 dark:text-white text-sm">Info Rekening Transfer</p>
+                                <p class="text-xs text-orange-600 dark:text-orange-400">Selesaikan transfer setelah order dibuat</p>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-700 rounded-xl p-4 space-y-3 border border-orange-100 dark:border-gray-600">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Bank</span>
+                                <span class="font-black text-gray-900 dark:text-white text-sm">🏦 BNI (Bank Negara Indonesia)</span>
+                            </div>
+                            <div class="border-t border-gray-100 dark:border-gray-600 pt-3 flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">No. Rekening</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-black text-gray-900 dark:text-white text-lg tracking-wider font-mono">0231090661</span>
+                                    <button type="button" onclick="copyNoRek()" class="text-xs bg-orange-100 hover:bg-orange-200 text-orange-700 px-2 py-1 rounded-lg transition font-bold">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="border-t border-gray-100 dark:border-gray-600 pt-3 flex items-center justify-between">
+                                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Atas Nama</span>
+                                <span class="font-bold text-gray-900 dark:text-white text-sm">SEPTIAN FAIZ WITANA</span>
+                            </div>
+                        </div>
+                        <div class="mt-3 flex items-start gap-2 text-xs text-orange-700 dark:text-orange-400">
+                            <i class="fas fa-info-circle mt-0.5 flex-shrink-0"></i>
+                            <p>Setelah order dibuat, Anda akan mendapat nomor invoice. Harap kirim bukti transfer via WhatsApp ke penjual agar pesanan segera diproses.</p>
                         </div>
                     </div>
 
@@ -404,14 +440,16 @@ function selectPaymentMethod(method) {
     currentPaymentMethod = method;
     const courierSection = document.getElementById('courierSection');
     const codInfoBox = document.getElementById('codInfoBox');
+    const bniInfoBox = document.getElementById('bniInfoBox');
     
     if (method === 'cod') {
         // Save current shipping cost
         savedShippingCost = parseInt(document.getElementById('input_shipping_cost').value) || 0;
         
-        // Hide courier section, show COD info
+        // Hide courier section, show COD info, hide BNI
         courierSection.classList.add('hidden');
         codInfoBox.classList.remove('hidden');
+        bniInfoBox.classList.add('hidden');
         
         // Set inputs for COD
         document.getElementById('input_shipping_cost').value = 0;
@@ -422,10 +460,27 @@ function selectPaymentMethod(method) {
         
         recalculateTotal();
         document.getElementById('submitBtn').innerHTML = '<i class="fas fa-handshake text-xs"></i> Buat Pesanan COD';
-    } else {
-        // Show courier section, hide COD info
+    } else if (method === 'bank_transfer') {
+        // Show courier section, hide COD info, show BNI
         courierSection.classList.remove('hidden');
         codInfoBox.classList.add('hidden');
+        bniInfoBox.classList.remove('hidden');
+        
+        // Restore shipping cost
+        const activeRadio = document.querySelector('input[name="courier_service_key"]:checked');
+        if (activeRadio) {
+            activeRadio.dispatchEvent(new Event('change'));
+        } else {
+            updateShipping(savedShippingCost, document.getElementById('input_courier').value, document.getElementById('input_service').value);
+        }
+        
+        document.getElementById('displayShipping').className = 'font-semibold';
+        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-university text-xs"></i> Buat Pesanan & Transfer BNI';
+    } else {
+        // Show courier section, hide COD info and BNI info (midtrans)
+        courierSection.classList.remove('hidden');
+        codInfoBox.classList.add('hidden');
+        bniInfoBox.classList.add('hidden');
         
         // Restore shipping cost
         const activeRadio = document.querySelector('input[name="courier_service_key"]:checked');
@@ -438,6 +493,14 @@ function selectPaymentMethod(method) {
         document.getElementById('displayShipping').className = 'font-semibold';
         document.getElementById('submitBtn').innerHTML = '<i class="fas fa-lock text-xs"></i> Lanjut ke Pembayaran';
     }
+}
+
+function copyNoRek() {
+    navigator.clipboard.writeText('0231090661').then(() => {
+        showToast('Nomor rekening berhasil disalin!', 'success');
+    }).catch(() => {
+        showToast('Gagal menyalin. Salin manual: 0231090661', 'info');
+    });
 }
 
 function updateShipping(cost, courier, service) {
@@ -454,6 +517,9 @@ function updateShipping(cost, courier, service) {
 
 // Init with default JNE REG
 updateShipping(15000, 'JNE', 'REG');
+
+// Init payment method (COD is default)
+selectPaymentMethod('cod');
 
 // Form validation
 document.getElementById('checkoutForm').addEventListener('submit', function(e) {

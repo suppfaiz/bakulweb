@@ -32,7 +32,7 @@
 
         <!-- Action Buttons -->
         <div class="flex flex-col gap-3">
-            <a href="https://wa.me/628123456789?text=Halo%20BAKUL,%20saya%20ingin%20koordinasi%20untuk%20COD%20pesanan%20invoice%20<?= htmlspecialchars($data['invoice']) ?>" 
+            <a href="https://wa.me/6289631090661?text=Halo%20BAKUL%2C%20saya%20ingin%20koordinasi%20untuk%20COD%20pesanan%20invoice%20<?= htmlspecialchars($data['invoice']) ?>" 
                target="_blank"
                class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-emerald-600 transition shadow-md flex items-center justify-center gap-2">
                 <i class="fab fa-whatsapp text-base"></i> Hubungi Penjual (WhatsApp)
