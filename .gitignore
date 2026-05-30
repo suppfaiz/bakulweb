@@ -1,0 +1,9 @@
+/node_modules/
+/backups/
+/vendor/
+.env
+.env.local
+.env.*.local
+*.log
+*.cookie
+.DS_Store
