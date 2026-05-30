@@ -112,14 +112,20 @@
                 <div class="mt-6 border-t border-gray-200 pt-6">
                     <h3 class="text-sm font-medium text-gray-900 mb-4">Pilih Varian (Kapasitas / Warna)</h3>
                     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                        <?php if(!empty($data['variants'])): foreach($data['variants'] as $var): ?>
-                        <label class="group relative border border-gray-300 rounded-lg py-3 px-4 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 cursor-pointer transition-all">
-                            <input type="radio" name="variant_id" value="<?= $var['id']; ?>" class="sr-only" aria-labelledby="variant-label" <?= $var === reset($data['variants']) ? 'checked' : ''; ?>>
-                            <span id="variant-label"><?= $var['storage']; ?> - <?= $var['color']; ?></span>
+                        <?php if(!empty($data['variants'])): 
+                            $is_first = true;
+                            foreach($data['variants'] as $var): 
+                        ?>
+                        <label for="variant-<?= $var['id']; ?>" class="group relative border border-gray-300 rounded-lg py-3 px-4 flex items-center justify-center text-sm font-medium uppercase hover:bg-gray-50 focus:outline-none sm:flex-1 cursor-pointer transition-all">
+                            <input type="radio" id="variant-<?= $var['id']; ?>" name="variant_id" value="<?= $var['id']; ?>" class="peer sr-only" <?= $is_first ? 'checked' : ''; ?>>
+                            <span><?= htmlspecialchars($var['storage']); ?> - <?= htmlspecialchars($var['color']); ?></span>
                             <!-- Active ring -->
-                            <span class="absolute -inset-px rounded-lg border-2 border-transparent pointer-events-none group-has-[:checked]:border-black" aria-hidden="true"></span>
+                            <span class="absolute -inset-px rounded-lg border-2 border-transparent pointer-events-none peer-checked:border-black" aria-hidden="true"></span>
                         </label>
-                        <?php endforeach; else: ?>
+                        <?php 
+                            $is_first = false;
+                            endforeach; 
+                        else: ?>
                             <p class="text-sm text-gray-500">Tidak ada varian tersedia.</p>
                         <?php endif; ?>
                     </div>
@@ -211,7 +217,9 @@
                   showToast('Gagal: ' + data.message, 'error');
               }
           }).catch(err => {
-            });
+              console.error('Error adding to cart:', err);
+              showToast('Terjadi kesalahan koneksi atau server.', 'error');
+          });
     }
 
     // Live Chat Client Logic
