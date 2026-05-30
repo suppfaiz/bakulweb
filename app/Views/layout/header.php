@@ -3,6 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Override console logs in production to keep browser console clean -->
+    <script>
+        if (!['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname)) {
+            console.log = () => {};
+            console.error = () => {};
+            console.warn = () => {};
+            console.info = () => {};
+            console.debug = () => {};
+        }
+    </script>
     <?php
     // Default SEO values
     $meta_title = isset($data['judul']) ? $data['judul'] : 'BAKUL E-Commerce';
@@ -100,8 +111,9 @@
     </script>
     <?php endif; ?>
     
-    <!-- Apple Web App Meta -->
+    <!-- Web App / PWA Meta -->
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="BAKUL">
     <meta name="theme-color" content="#ffffff">
