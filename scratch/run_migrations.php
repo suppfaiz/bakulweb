@@ -99,3 +99,25 @@ if ($res['count'] == 0) {
 } else {
     echo "homepage_promos table already has data. Seeding skipped.\n";
 }
+
+// Create warranty_claims table if not exists
+try {
+    $query_warranty = "CREATE TABLE IF NOT EXISTS `warranty_claims` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `user_id` int(11) NOT NULL,
+      `invoice` varchar(50) NOT NULL,
+      `device_name` varchar(255) NOT NULL,
+      `reason` text NOT NULL,
+      `attachment_path` varchar(255) NOT NULL,
+      `status` enum('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+      `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+      PRIMARY KEY (`id`),
+      FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+    
+    $db->query($query_warranty);
+    $db->execute();
+    echo "Table warranty_claims created or already exists.\n";
+} catch (PDOException $e) {
+    echo "Error creating warranty_claims: " . $e->getMessage() . "\n";
+}
