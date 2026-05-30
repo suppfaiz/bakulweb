@@ -58,10 +58,11 @@ class NocGuard {
     public static function init() {
         self::$startTime = microtime(true);
 
-        // Jika NOC route → skip logging dan threat check
+        // Jika NOC route (default atau kustom) → skip logging dan threat check
         $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
         $uri = '/' . ltrim($uri, '/');
-        if (strpos($uri, '/noc') === 0) {
+        $nocPath = defined('NOC_PATH') ? NOC_PATH : 'noc';
+        if (strpos($uri, '/noc') === 0 || ($nocPath !== '' && strpos($uri, '/' . $nocPath) === 0)) {
             return;
         }
 

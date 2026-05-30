@@ -12,12 +12,39 @@ class NocController extends Controller {
         $this->db = new Database();
     }
 
+    private function redirect($path) {
+        $nocPath = defined('NOC_PATH') ? NOC_PATH : 'noc';
+        if ($path === '') {
+            header('Location: ' . BASEURL . '/' . $nocPath);
+        } else {
+            header('Location: ' . BASEURL . '/' . $nocPath . '/' . ltrim($path, '/'));
+        }
+        exit;
+    }
+
+    public function view($view, $data = []) {
+        $nocPath = defined('NOC_PATH') ? NOC_PATH : 'noc';
+        if ($nocPath !== 'noc') {
+            ob_start();
+            require_once __DIR__ . '/../Views/' . $view . '.php';
+            $html = ob_get_clean();
+            
+            // Mengganti semua tautan BASEURL/noc menjadi BASEURL/NOC_PATH secara dinamis
+            $search = BASEURL . '/noc';
+            $replace = BASEURL . '/' . $nocPath;
+            $html = str_replace($search, $replace, $html);
+            
+            echo $html;
+        } else {
+            parent::view($view, $data);
+        }
+    }
+
     // ─── NOC Auth ─────────────────────────────────────────────────────────────
 
     private function requireNocAuth() {
         if (empty($_SESSION['noc_auth'])) {
-            header('Location: ' . BASEURL . '/noc/login');
-            exit;
+            $this->redirect('login');
         }
     }
 
@@ -29,8 +56,7 @@ class NocController extends Controller {
 
     public function login() {
         if (!empty($_SESSION['noc_auth'])) {
-            header('Location: ' . BASEURL . '/noc');
-            exit;
+            $this->redirect('');
         }
         $data = ['error' => null];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -38,8 +64,7 @@ class NocController extends Controller {
             if ($password === $this->nocPassword()) {
                 $_SESSION['noc_auth'] = true;
                 $_SESSION['noc_login_time'] = time();
-                header('Location: ' . BASEURL . '/noc');
-                exit;
+                $this->redirect('');
             } else {
                 $data['error'] = 'Password NOC tidak valid.';
             }
@@ -49,8 +74,7 @@ class NocController extends Controller {
 
     public function logout() {
         unset($_SESSION['noc_auth'], $_SESSION['noc_login_time']);
-        header('Location: ' . BASEURL . '/noc/login');
-        exit;
+        $this->redirect('login');
     }
 
     // ─── Dashboard ────────────────────────────────────────────────────────────
@@ -147,16 +171,14 @@ class NocController extends Controller {
     public function toggle_block() {
         $this->requireNocAuth();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: ' . BASEURL . '/noc/blocked');
-            exit;
+            $this->redirect('blocked');
         }
         $action = $_POST['action'] ?? '';
         $ip     = trim($_POST['ip'] ?? '');
         $reason = trim($_POST['reason'] ?? 'Manual block by NOC operator');
 
         if (!filter_var($ip, FILTER_VALIDATE_IP)) {
-            header('Location: ' . BASEURL . '/noc/blocked');
-            exit;
+            $this->redirect('blocked');
         }
 
         if ($action === 'block') {
@@ -171,8 +193,7 @@ class NocController extends Controller {
             $this->db->bind('ip', $ip);
             $this->db->execute();
         }
-        header('Location: ' . BASEURL . '/noc/blocked');
-        exit;
+        $this->redirect('blocked');
     }
 
     // ─── Clear Logs ───────────────────────────────────────────────────────────
@@ -183,8 +204,7 @@ class NocController extends Controller {
             $this->db->query("DELETE FROM noc_traffic_logs WHERE threat_level = 'none' AND created_at < NOW() - INTERVAL 7 DAY");
             $this->db->execute();
         }
-        header('Location: ' . BASEURL . '/noc/logs');
-        exit;
+        $this->redirect('logs');
     }
 
     // ─── Security Self-Audit ──────────────────────────────────────────────────
@@ -325,8 +345,7 @@ class NocController extends Controller {
                 }
             }
         }
-        header('Location: ' . BASEURL . '/noc/settings');
-        exit;
+        $this->redirect('settings');
     }
 
     public function audit_fix() {
@@ -350,8 +369,7 @@ class NocController extends Controller {
             }
         }
         
-        header('Location: ' . BASEURL . '/noc/audit');
-        exit;
+        $this->redirect('audit');
     }
 
     public function resolve_threat() {
@@ -364,7 +382,8 @@ class NocController extends Controller {
                 $this->db->execute();
             }
         }
-        $ref = $_SERVER['HTTP_REFERER'] ?? (BASEURL . '/noc/logs');
+        $nocPath = defined('NOC_PATH') ? NOC_PATH : 'noc';
+        $ref = $_SERVER['HTTP_REFERER'] ?? (BASEURL . '/' . $nocPath . '/logs');
         header('Location: ' . $ref);
         exit;
     }
@@ -391,7 +410,8 @@ class NocController extends Controller {
                 }
             }
         }
-        $ref = $_SERVER['HTTP_REFERER'] ?? (BASEURL . '/noc/logs');
+        $nocPath = defined('NOC_PATH') ? NOC_PATH : 'noc';
+        $ref = $_SERVER['HTTP_REFERER'] ?? (BASEURL . '/' . $nocPath . '/logs');
         header('Location: ' . $ref);
         exit;
     }
@@ -630,8 +650,7 @@ class NocController extends Controller {
         
         // Safety guard
         if (!$file || strpos($file, $root) !== 0 || !is_file($file)) {
-            header('Location: ' . BASEURL . '/noc/filemanager');
-            exit;
+            $this->redirect('filemanager');
         }
         
         $data['title'] = 'Live Editor | NOC';
@@ -662,12 +681,10 @@ class NocController extends Controller {
                 $_SESSION['noc_flash_error'] = 'Akses tidak sah ke file.';
             }
             
-            header('Location: ' . BASEURL . '/noc/edit_file?file=' . urlencode($file));
-            exit;
+            $this->redirect('edit_file?file=' . urlencode($file));
         }
         
-        header('Location: ' . BASEURL . '/noc/filemanager');
-        exit;
+        $this->redirect('filemanager');
     }
 
     public function create_file() {
@@ -705,12 +722,10 @@ class NocController extends Controller {
                 $_SESSION['noc_flash_error'] = "Parameter tidak valid.";
             }
             
-            header('Location: ' . BASEURL . '/noc/filemanager?dir=' . urlencode($dir));
-            exit;
+            $this->redirect('filemanager?dir=' . urlencode($dir));
         }
         
-        header('Location: ' . BASEURL . '/noc/filemanager');
-        exit;
+        $this->redirect('filemanager');
     }
 
     public function delete_file() {
@@ -741,12 +756,10 @@ class NocController extends Controller {
                 $_SESSION['noc_flash_error'] = "Aksi tidak diizinkan.";
             }
             
-            header('Location: ' . BASEURL . '/noc/filemanager?dir=' . urlencode($parent));
-            exit;
+            $this->redirect('filemanager?dir=' . urlencode($parent));
         }
         
-        header('Location: ' . BASEURL . '/noc/filemanager');
-        exit;
+        $this->redirect('filemanager');
     }
 
     private function rrmdir($dir) {
@@ -1031,8 +1044,7 @@ class NocController extends Controller {
                 $_SESSION['noc_flash_error'] = "Gagal membuat cron job: OS tidak kompatibel atau perintah kosong.";
             }
         }
-        header('Location: ' . BASEURL . '/noc/cron');
-        exit;
+        $this->redirect('cron');
     }
 
     public function delete_cron() {
@@ -1067,8 +1079,7 @@ class NocController extends Controller {
                 }
             }
         }
-        header('Location: ' . BASEURL . '/noc/cron');
-        exit;
+        $this->redirect('cron');
     }
 
     public function backup() {
@@ -1192,8 +1203,7 @@ class NocController extends Controller {
                 }
             }
         }
-        header('Location: ' . BASEURL . '/noc/backup');
-        exit;
+        $this->redirect('backup');
     }
 
     public function download_backup() {
@@ -1215,8 +1225,7 @@ class NocController extends Controller {
             exit;
         } else {
             $_SESSION['noc_flash_error'] = "Berkas backup tidak ditemukan atau akses tidak sah.";
-            header('Location: ' . BASEURL . '/noc/backup');
-            exit;
+            $this->redirect('backup');
         }
     }
 
@@ -1238,8 +1247,7 @@ class NocController extends Controller {
                 $_SESSION['noc_flash_error'] = "Aksi tidak sah.";
             }
         }
-        header('Location: ' . BASEURL . '/noc/backup');
-        exit;
+        $this->redirect('backup');
     }
 
     public function phpini() {
@@ -1298,8 +1306,7 @@ class NocController extends Controller {
                 $_SESSION['noc_flash_error'] = "Gagal memperbarui konfigurasi .user.ini. Pastikan folder public dapat ditulis.";
             }
         }
-        header('Location: ' . BASEURL . '/noc/phpini');
-        exit;
+        $this->redirect('phpini');
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────────────

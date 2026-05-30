@@ -8,6 +8,24 @@ class App {
     public function __construct() {
         $url = $this->parseURL();
 
+        if (isset($url[0])) {
+            $nocPath = defined('NOC_PATH') ? NOC_PATH : 'noc';
+            
+            // Jika path NOC kustom diaktifkan (bukan 'noc')
+            if (strtolower($nocPath) !== 'noc') {
+                if (strtolower($url[0]) === 'noc') {
+                    // Blokir akses langsung ke default /noc route
+                    http_response_code(404);
+                    echo '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>404 Not Found</h1>The requested URL was not found on this server.</body></html>';
+                    exit;
+                }
+                if (strtolower($url[0]) === strtolower($nocPath)) {
+                    // Petakan rute kustom ke 'noc' secara internal agar ditangani NocController
+                    $url[0] = 'noc';
+                }
+            }
+        }
+
         // Check if file controller exists
         if (isset($url[0])) {
             $controllerName = ucfirst($url[0]) . 'Controller';

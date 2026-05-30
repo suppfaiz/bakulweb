@@ -19,3 +19,6 @@ define('BASEURL', $protocol . $host);
 
 // Password NOC untuk otentikasi log/keamanan
 define('NOC_PASSWORD', getenv('NOC_PASSWORD') ?: 'NocBakul2026!');
+
+// Path kustom untuk mengakses Network Operations Center (NOC)
+define('NOC_PATH', getenv('NOC_PATH') ?: 'noc');
