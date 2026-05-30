@@ -183,17 +183,21 @@ class AuthController extends Controller {
             ];
 
             if ($userModel->registerUser($registerData) > 0) {
-                require_once __DIR__ . '/../Helpers/EmailHelper.php';
-                EmailHelper::sendVerificationCode($email, $verificationCode);
-                
-                $_SESSION['temp_verify_email'] = $email;
+                // [OTP DINONAKTIFKAN SEMENTARA] - aktifkan langsung tanpa verifikasi email
+                $userModel->activateUser($email);
 
+                $user = $userModel->getUserByEmail($email);
                 header('Content-Type: application/json');
                 echo json_encode([
-                    'success' => true,
-                    'requires_verification' => true,
-                    'email' => $email,
-                    'message' => 'Registrasi berhasil. Silakan masukkan kode verifikasi yang telah dikirim ke email Anda.'
+                    'success'              => true,
+                    'requires_verification' => false,
+                    'message'              => 'Registrasi berhasil! Akun Anda langsung aktif.',
+                    'user'                 => [
+                        'id'    => $user['id'],
+                        'name'  => $user['username'],
+                        'email' => $user['email'],
+                        'role'  => $user['role']
+                    ]
                 ]);
             } else {
                 header('Content-Type: application/json');
@@ -265,12 +269,18 @@ class AuthController extends Controller {
             ];
 
             if ($userModel->registerUser($registerData) > 0) {
-                require_once __DIR__ . '/../Helpers/EmailHelper.php';
-                EmailHelper::sendVerificationCode($email, $verificationCode);
-                
-                $_SESSION['temp_verify_email'] = $email;
-                Flasher::setFlash('Registrasi Berhasil.', 'Silakan masukkan kode verifikasi yang telah dikirim ke email Anda.', 'success');
-                header('Location: ' . BASEURL . '/auth/verify');
+                // [OTP DINONAKTIFKAN SEMENTARA] - aktifkan langsung tanpa verifikasi email
+                $userModel->activateUser($email);
+
+                // Langsung login user
+                $user = $userModel->getUserByEmail($email);
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['role']    = $user['role'];
+                $_SESSION['name']    = $user['username'];
+                $_SESSION['email']   = $user['email'];
+
+                Flasher::setFlash('Registrasi Berhasil!', 'Selamat datang di BAKUL, ' . htmlspecialchars($username) . '!', 'success');
+                header('Location: ' . BASEURL . '/');
                 exit;
             } else {
                 Flasher::setFlash('Registrasi Gagal:', 'Terjadi kesalahan sistem, silakan coba lagi.', 'error');

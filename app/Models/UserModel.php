@@ -78,4 +78,11 @@ class UserModel {
         $this->db->query("SELECT COUNT(*) as count FROM users WHERE role = 'customer'");
         return $this->db->single()['count'] ?? 0;
     }
+
+    // [OTP DINONAKTIFKAN SEMENTARA] - langsung aktifkan akun tanpa verifikasi email
+    public function activateUser($email) {
+        $this->db->query("UPDATE users SET is_verified = 1, verification_code = NULL WHERE email = :email");
+        $this->db->bind('email', $email);
+        return $this->db->execute();
+    }
 }
