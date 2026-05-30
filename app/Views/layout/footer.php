@@ -1,11 +1,11 @@
     <!-- Footer -->
     <footer class="bg-white dark:bg-darkcard border-t border-gray-200 dark:border-gray-800 mt-20 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8">
                 <!-- Branding -->
-                <div class="col-span-1 md:col-span-1">
+                <div class="col-span-1 lg:col-span-4">
                     <a href="<?= BASEURL; ?>" class="inline-block">
-                        <img src="<?= BASEURL; ?>/images/logo.jpg" alt="BAKUL Logo" class="h-28 md:h-36 w-auto object-contain">
+                        <img src="<?= BASEURL; ?>/images/logo.jpg" alt="BAKUL Logo" style="height: 64px; width: auto;" class="object-contain">
                     </a>
                     <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">
                         Platform e-commerce enterprise untuk gadget, smartphone, dan aksesoris terlengkap dan terpercaya.
@@ -18,7 +18,7 @@
                 </div>
                 
                 <!-- Links -->
-                <div>
+                <div class="col-span-1 lg:col-span-2">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Perusahaan</h3>
                     <ul class="mt-4 space-y-3 text-sm text-gray-500 dark:text-gray-400">
                         <li><a href="#" class="hover:text-primary transition">Tentang Kami</a></li>
@@ -28,7 +28,7 @@
                     </ul>
                 </div>
                 
-                <div>
+                <div class="col-span-1 lg:col-span-2">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Bantuan</h3>
                     <ul class="mt-4 space-y-3 text-sm text-gray-500 dark:text-gray-400">
                         <li><a href="<?= BASEURL; ?>/help" class="hover:text-primary transition">Pusat Bantuan</a></li>
@@ -39,7 +39,7 @@
                 </div>
                 
                 <!-- Newsletter -->
-                <div>
+                <div class="col-span-1 lg:col-span-4">
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Newsletter</h3>
                     <p class="mt-4 text-sm text-gray-500 dark:text-gray-400">Dapatkan update promo dan produk terbaru langsung ke inbox Anda.</p>
                     <form class="mt-4 flex">
